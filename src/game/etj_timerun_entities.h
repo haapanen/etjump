@@ -52,8 +52,7 @@ public:
 class TargetStartTimer : public TimerunEntity {
 private:
   static void use(gentity_t *self, gentity_t *activator);
-  static bool canStartTimerun(gentity_t *self, gentity_t *activator,
-                              const int *clientNum, const float *speed);
+  static bool canStartTimerun(gentity_t *self, gentity_t *activator, const float *speed);
 
 public:
   static void spawn(gentity_t *self);

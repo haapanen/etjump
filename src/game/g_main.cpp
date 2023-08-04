@@ -3,6 +3,7 @@
 #include "g_local.h"
 #include "etj_deathrun_system.h"
 #include "etj_database.h"
+#include "etj_print.h"
 #include "etj_session.h"
 #include "etj_save_system.h"
 #include "etj_printer.h"
@@ -3193,22 +3194,21 @@ void CheckVote(void) {
 
   auto voter = g_entities + level.voteInfo.voter_cn;
   if (level.voteInfo.voter_team != voter->client->sess.sessionTeam) {
-    Printer::BroadcastPopupMessage("^7Vote canceled: caller switched team.");
+    ETJump::Print::broadcastPopupR("^7Vote canceled: caller switched team.");
     G_LogPrintf("Vote canceled: %s (caller %s switched teams)\n",
                 level.voteInfo.voteString, voter->client->pers.netname);
     level.voteInfo.voteYes = 0;
     level.voteInfo.voteNo = level.numConnectedClients;
   } else if (level.voteInfo.voteYes > requiredClients) {
-    Printer::BroadcastPopupMessage("^5Vote passed!");
+    ETJump::Print::broadcastPopupR("^5Vote passed!");
     G_LogPrintf("Vote Passed: %s\n", level.voteInfo.voteString);
     level.voteInfo.voteTime = 0;
     level.voteInfo.voteCanceled = qfalse;
     level.voteInfo.vote_fn(NULL, 0, NULL, NULL);
   } else if (level.voteInfo.voteNo >= numConnectedClients - requiredClients ||
              level.time - level.voteInfo.voteTime >= VOTE_TIME) {
-    std::string voteFailedMsg = ETJump::stringFormat("^3Vote FAILED! ^3(%s)",
-                                                     level.voteInfo.voteString);
-    Printer::BroadcastPopupMessage(voteFailedMsg);
+    ETJump::Print::broadcastPopupR("^3Vote FAILED! ^3(%s)",
+                                   level.voteInfo.voteString);
     G_LogPrintf("Vote Failed: %s\n", level.voteInfo.voteString);
     level.voteInfo.voteTime = 0;
     level.voteInfo.voteCanceled = qfalse;

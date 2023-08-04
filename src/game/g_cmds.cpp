@@ -893,10 +893,9 @@ void decreaseNoclipCount(gentity_t *ent, const std::string &action) {
 
   if (ent->client->pers.noclipCount > 0) {
     --ent->client->pers.noclipCount;
-    Printer::SendCenterMessage(
-        ClientNum(ent),
-        ETJump::stringFormat("^7You may use ^3%s ^2%d^7 more times.\n", action,
-                             ent->client->pers.noclipCount));
+    Print::centerR(
+        ent, "^7You may use ^3%s ^2%d^7 more times.", action,
+        ent->client->pers.noclipCount);
   }
 }
 
@@ -904,22 +903,21 @@ const float MaxAxisOffset = 4096.f;
 // offsets player's position by given vector if noclip is available
 void setPlayerOffset(gentity_t *ent) {
   static char buffer[64];
-  auto clientNum = ClientNum(ent);
 
   if (trap_Argc() != 4) {
-    Printer::SendConsoleMessage(clientNum,
-                                "^3Usage: ^7setoffset x y z\nChanges your "
-                                "position into the "
-                                "direction of X Y Z vector.\n");
+    Print::playerConsole(ent, "usage",
+                         "setoffset x y z\nChanges your "
+                         "position into the "
+                         "direction of X Y Z vector.");
     return;
   }
 
   auto result = canNoclip(ent);
 
   if (!result.success) {
-    std::string str = ETJump::stringFormat(result.message, "setoffset");
+    std::string str = stringFormat(result.message, "setoffset");
     capitalizeWithColor(str);
-    Printer::SendConsoleMessage(clientNum, str);
+    Print::playerConsoleR(ent, str);
     return;
   }
 
@@ -947,22 +945,18 @@ void setPlayerOffset(gentity_t *ent) {
 }
 
 void interruptRun(gentity_t *ent) {
-  auto clientNum = ClientNum(ent);
-
   if (ent->client->sess.timerunActive) {
     InterruptRun(ent);
-    Printer::SendConsoleMessage(clientNum, "Timerun interrupted.\n");
+    Print::playerConsoleR(ent, "Timerun interrupted.");
   } else {
-    Printer::SendConsoleMessage(clientNum, "No timerun currently active.\n");
+    Print::playerConsoleR(ent, "No timerun currently active.");
   }
 }
 
 bool checkTrackerIndex(int clientNum, int idx, char *buffer, bool noIndex) {
   if (((idx < 1 || idx > MAX_PROGRESSION_TRACKERS) && !noIndex) ||
       !(std::regex_match(buffer, std::regex("^-*\\d+")))) {
-    Printer::SendConsoleMessage(clientNum,
-                                "^3Error: ^7Invalid index specified. Valid "
-                                "range is ^31-50^7.\n");
+    Print::playerConsole(clientNum,"error", "Invalid index specified. Valid range is ^31-50^7.\n");
     return false;
   }
 
@@ -971,8 +965,8 @@ bool checkTrackerIndex(int clientNum, int idx, char *buffer, bool noIndex) {
 
 bool checkTrackerValue(int clientNum, char *value) {
   if (!std::regex_match(value, std::regex("^[+-]?\\d+"))) {
-    Printer::SendConsoleMessage(
-        clientNum, "^3Error: ^7Specified value is not an integer.\n");
+    Print::playerConsole(
+        clientNum, "error", "Specified value is not an integer.");
     return false;
   }
 
@@ -981,20 +975,17 @@ bool checkTrackerValue(int clientNum, char *value) {
 
 void printTracker(gentity_t *ent) {
   std::string printTrackerMsg;
-  auto clientNum = ClientNum(ent);
   static char buffer[16];
   int i;
 
   if (g_debugTrackers.integer <= 0) {
-    Printer::SendConsoleMessage(
-        clientNum, "^3Error: ^7Tracker debugging is not enabled.\n");
+    Print::playerConsole(ent, "error", "Tracker debugging is not enabled.");
     return;
   }
 
   if (trap_Argc() < 2) {
-    printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", 1,
-                                   ent->client->sess.progression[0]);
-    Printer::SendConsoleMessage(clientNum, printTrackerMsg);
+    Print::playerConsoleR(ent, "Index: ^3%i ^7value: ^2%i\n", 1,
+                          ent->client->sess.progression[0]);
     return;
   }
 
@@ -1002,9 +993,8 @@ void printTracker(gentity_t *ent) {
 
   if (!Q_stricmp("all", buffer)) {
     for (i = 0; i < MAX_PROGRESSION_TRACKERS; i++) {
-      printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", i + 1,
-                                     ent->client->sess.progression[i]);
-      Printer::SendConsoleMessage(clientNum, printTrackerMsg);
+      Print::playerConsoleR(ent, "Index: ^3%i ^7value: ^2%i\n", i + 1,
+                            ent->client->sess.progression[i]);
     }
   } else {
     int numArgs = trap_Argc();
@@ -1013,10 +1003,10 @@ void printTracker(gentity_t *ent) {
       trap_Argv(i, buffer, sizeof buffer);
       int idx = Q_atoi(buffer);
 
-      if (checkTrackerIndex(clientNum, idx, buffer, false)) {
-        printTrackerMsg = stringFormat("Index: ^3%i ^7value: ^2%i\n", idx,
-                                       ent->client->sess.progression[idx - 1]);
-        Printer::SendConsoleMessage(clientNum, printTrackerMsg);
+      if (checkTrackerIndex(ClientNum(ent), idx, buffer, false)) {
+        Print::playerConsoleR(ent, "Index: ^3%i ^7value: ^2%i\n",
+                                    idx,
+                                    ent->client->sess.progression[idx - 1]);
       }
     }
   }
@@ -1033,16 +1023,15 @@ void setTracker(gentity_t *ent) {
   // Check this first before g_debugTrackers so help can be printed even
   // when debugging isn't enabled.
   if (trap_Argc() < 2 || trap_Argc() > 3) {
-    Printer::SendConsoleMessage(
-        clientNum, "^3Usage: ^7tracker_set <index|all> <value>\nSets your "
+    Print::playerConsole(ent, "usage", "tracker_set <index|all> <value>\nSets your "
                    "tracker value on specified index to N. If index isn't "
-                   "specified, defaults to index 1.\n");
+                   "specified, defaults to index 1.");
     return;
   }
 
   if (g_debugTrackers.integer <= 0) {
-    Printer::SendConsoleMessage(
-        clientNum, "^3Error: ^7Tracker debugging is not enabled.\n");
+    Print::playerConsole(ent, "error",
+                         "Tracker debugging is not enabled.");
     return;
   }
 
@@ -1051,8 +1040,7 @@ void setTracker(gentity_t *ent) {
 
   if (!Q_stricmp("all", bufferIndex)) {
     if (trap_Argc() == 2) {
-      Printer::SendConsoleMessage(clientNum,
-                                  "^3Error: ^7value not specified.\n");
+      Print::playerConsole(ent, "error", "value not specified.");
       return;
     }
 
@@ -1067,7 +1055,10 @@ void setTracker(gentity_t *ent) {
       setTrackerMsg = stringFormat("^7Set tracker value on all "
                                    "indices to ^2%i^7.\n",
                                    value);
-      Printer::SendConsoleMessage(clientNum, setTrackerMsg);
+      Print::playerConsoleR(ent,
+                            "^7Set tracker value on all "
+                            "indices to ^2%i^7.\n",
+                            value);
     }
   }
 
@@ -1077,10 +1068,9 @@ void setTracker(gentity_t *ent) {
       if (checkTrackerIndex(clientNum, idx, bufferIndex, noIndex)) {
         ent->client->sess.progression[0] = idx; // No index specified, use it
                                                 // for value on index 1
-        setTrackerMsg = stringFormat("^7Tracker set - index: ^31 "
-                                     "^7value: ^2%i\n",
-                                     idx);
-        Printer::SendConsoleMessage(clientNum, setTrackerMsg);
+        Print::playerConsoleR(clientNum, "^7Tracker set - index: ^31 "
+                              "^7value: ^2%i",
+                              idx);
         return;
       }
     }
@@ -1101,19 +1091,17 @@ void setTracker(gentity_t *ent) {
       if (checkTrackerValue(clientNum, bufferValue)) {
         value = Q_atoi(bufferValue);
         ent->client->sess.progression[idx - 1] = value;
-        setTrackerMsg = stringFormat("^7Tracker set - index: ^3%i "
-                                     "^7value: ^2%i\n",
-                                     idx, value);
-        Printer::SendConsoleMessage(clientNum, setTrackerMsg);
+        Print::playerConsoleR(ent, "^7Tracker set - index: ^3%i "
+                              "^7value: ^2%i",
+                              idx, value);
       }
     }
   }
 }
 
 void clearSaves(gentity_t *ent) {
-  auto clientNum = ClientNum(ent);
   saveSystem->resetSavedPositions(ent);
-  Printer::SendCenterMessage(clientNum, "^7Your saves were removed.\n");
+  Print::centerR(ent, "^7Your saves were removed.");
 }
 } // namespace ETJump
 
@@ -1126,13 +1114,12 @@ argv(0) noclip
 */
 void Cmd_Noclip_f(gentity_t *ent) {
   auto *name = ConcatArgs(1);
-  auto clientNum = ClientNum(ent);
   auto result = ETJump::canNoclip(ent);
 
   if (!result.success) {
     std::string str = ETJump::stringFormat(result.message, "noclip");
     capitalizeWithColor(str);
-    Printer::SendCenterMessage(clientNum, str);
+    ETJump::Print::centerR(ent, str);
     return;
   }
 
@@ -2538,43 +2525,41 @@ checkVoteConditions
 Checks if a vote can be called
 ==================
 */
-bool checkVoteConditions(gentity_t *ent, int clientNum) {
+bool checkVoteConditions(gentity_t *ent) {
   std::string voteError;
 
   if (voteFlags.integer ==
       VOTING_DISABLED) // Setting g_enableVote 0 sets this flag as well
   {
-    Printer::SendPopupMessage(clientNum,
-                              "Voting is not enabled on this server.\n");
+    ETJump::Print::popupR(ent, "Voting is not enabled on this server.");
     return false;
   }
   if (ent && ent->client->sess.muted && g_mute.integer & 2) {
-    Printer::SendPopupMessage(clientNum, "^3callvote: ^7not allowed to "
-                                         "call a vote while muted.\n");
+    ETJump::Print::popup(ent, "callvote",
+                         "not allowed to call a vote while muted.");
     return false;
   }
   if (ent && ent->client->sess.sessionTeam == TEAM_SPECTATOR &&
       !(g_spectatorVote.integer >= 2)) {
-    Printer::SendPopupMessage(clientNum,
-                              "^3callvote: ^7you are not allowed to call "
-                              "a vote as a spectator.\n");
+    ETJump::Print::popup(ent, "callvote",
+                         "you are not allowed to call "
+                         "a vote as a spectator.");
     return false;
   }
   if (level.voteInfo.voteTime) {
-    Printer::SendPopupMessage(clientNum, "A vote is already in progress.\n");
+    ETJump::Print::popupR(ent, "A vote is already in progress.");
     return false;
   }
   if (level.intermissiontime) {
-    Printer::SendPopupMessage(clientNum,
-                              "Cannot callvote during intermission.\n");
+    ETJump::Print::popupR(ent,
+                              "Cannot callvote during intermission");
     return false;
   }
   if (vote_limit.integer > 0 &&
       ent->client->pers.voteCount >= vote_limit.integer) {
-    voteError = ETJump::stringFormat("You have already called the "
-                                     "maximum number of votes (%d).\n",
-                                     vote_limit.integer);
-    Printer::SendPopupMessage(clientNum, voteError);
+    ETJump::Print::popupR(ent, "You have already called the "
+                          "maximum number of votes (%d).\n",
+                          vote_limit.integer);
     return false;
   }
 
@@ -2582,9 +2567,9 @@ bool checkVoteConditions(gentity_t *ent, int clientNum) {
     const int remainingTime = std::ceil(
         (g_disableVoteAfterMapChange.integer - (level.time - level.startTime)) /
         1000.0);
-    voteError = "You must wait " + ETJump::getSecondsString(remainingTime) +
-                " before voting after a map change.\n";
-    Printer::SendPopupMessage(clientNum, voteError);
+    ETJump::Print::popupR(ent, "You must wait " +
+                                   ETJump::getSecondsString(remainingTime) +
+                                   " before voting after a map change.\n");
     return false;
   }
   if (level.time - ent->client->lastVoteTime < g_voteCooldown.integer * 1000) {
@@ -2592,10 +2577,11 @@ bool checkVoteConditions(gentity_t *ent, int clientNum) {
         std::ceil(((g_voteCooldown.integer * 1000) -
                    (level.time - ent->client->lastVoteTime)) /
                   1000.0);
-    voteError = "^3callvote:^7 you must wait " +
-                ETJump::getSecondsString(voteCooldown) +
-                " before voting again.\n";
-    Printer::SendChatMessage(clientNum, voteError);
+
+    ETJump::Print::chat(ent, "callvote",
+                        "you must wait " +
+                            ETJump::getSecondsString(voteCooldown) +
+                            " before voting again.");
     return false;
   }
 
@@ -2611,9 +2597,8 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   int i;
   char arg1[MAX_STRING_TOKENS];
   char arg2[MAX_STRING_TOKENS];
-  int clientNum = ent - g_entities;
 
-  if (!checkVoteConditions(ent, clientNum)) {
+  if (!checkVoteConditions(ent)) {
     return;
   }
 
@@ -2629,11 +2614,8 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   if ((i = G_voteCmdCheck(ent, arg1, arg2)) != G_OK) {
     if (i == G_NOTFOUND) {
       if (arg1[0]) {
-        std::string errorMessage =
-            ETJump::stringFormat("\n^3Unknown vote command: "
-                                 "^7%s %s\n",
-                                 arg1, arg2);
-        Printer::SendConsoleMessage(ent - g_entities, errorMessage);
+        ETJump::Print::playerConsole(ent, "unknown vote command", "%s %s", arg1,
+                                     arg2);
       }
       G_voteHelp(ent, qtrue);
     }
@@ -2650,14 +2632,12 @@ void Cmd_CallVote_f(gentity_t *ent, unsigned int dwCommand, qboolean fValue) {
   level.voteInfo.voteYes = 1;
   trap_SendServerCommand(ent - g_entities, "voted yes");
 
-  std::string calledVoteString = ETJump::stringFormat(
-      "%s^7 called a vote. Voting for: %s\n", ent->client->pers.netname,
-      level.voteInfo.voteString);
-  Printer::BroadcastConsoleMessage(calledVoteString);
+  ETJump::Print::broadcastPlayerConsoleR("%s^7 called a vote. Voting for: %s",
+                                         ent->client->pers.netname,
+                                         level.voteInfo.voteString);
 
-  calledVoteString =
-      ETJump::stringFormat("%s^7 called a vote.", ent->client->pers.netname);
-  Printer::BroadcastCenterMessage(calledVoteString);
+  ETJump::Print::broadcastCenterR("%s^7 called a vote.",
+                                  ent->client->pers.netname);
 
   G_LogPrintf("%s called a vote. Voting for: %s\n", ent->client->pers.netname,
               level.voteInfo.voteString);
@@ -2726,7 +2706,7 @@ void Cmd_Vote_f(gentity_t *ent) {
       voteMsgs += std::string(nm) + " ";
     }
     voteMsgs += "\n";
-    Printer::SendConsoleMessage(clientNum, voteMsgs);
+    ETJump::Print::playerConsoleR(ent, voteMsgs);
   };
 
   if (ent->client->pers.applicationEndTime > level.time) {
@@ -2912,7 +2892,7 @@ void Cmd_Vote_f(gentity_t *ent) {
   ent->client->pers.propositionClient2 = -1;
 
   if (!level.voteInfo.voteTime) {
-    Printer::SendConsoleMessage(clientNum, "No vote in progress.\n");
+    ETJump::Print::playerConsoleR(ent, "No vote in progress.");
     return;
   }
   if (ent->client->ps.eFlags & EF_VOTED) {
@@ -2928,7 +2908,7 @@ void Cmd_Vote_f(gentity_t *ent) {
         level.voteInfo.voteCanceled = qtrue;
         level.voteInfo.voteNo = level.numConnectedClients;
         level.voteInfo.voteYes = 0;
-        Printer::BroadcastPopupMessage("^7Vote canceled by caller.");
+        ETJump::Print::broadcastPopupR("^7Vote canceled by caller.");
         return;
       } else {
         printVoteMsgs();
@@ -2947,8 +2927,8 @@ void Cmd_Vote_f(gentity_t *ent) {
         // stops excessive spam from server if user keeps voting in timeouts
         if (!client->pers.votingInfo.isWarned) {
           client->pers.votingInfo.isWarned = true;
-          Printer::SendPopupMessage(
-              clientNum, "You can't re-vote on this vote anymore.\n");
+          ETJump::Print::popupR(
+              ent, "You can't re-vote on this vote anymore.");
         }
         return;
       }
@@ -2963,13 +2943,12 @@ void Cmd_Vote_f(gentity_t *ent) {
       // stops excessive spam from server if user keeps voting in timeouts
       if (!client->pers.votingInfo.isWarned) {
         client->pers.votingInfo.isWarned = true;
-        Printer::SendPopupMessage(
-            clientNum,
-            ETJump::stringFormat(
-                "You must wait for %s before re-voting.\n",
-                ETJump::getSecondsString((client->pers.votingInfo.time +
-                                          ETJump::VOTING_TIMEOUT - level.time) /
-                                         1000)));
+        ETJump::Print::popupR(
+            ent,
+            "You must wait for %s before re-voting.",
+            ETJump::getSecondsString((client->pers.votingInfo.time +
+                                      ETJump::VOTING_TIMEOUT - level.time) /
+                                     1000));
       }
       return;
     }
@@ -2990,21 +2969,20 @@ void Cmd_Vote_f(gentity_t *ent) {
       return;
     }
 
-    Printer::SendPopupMessage(
-        clientNum,
-        ETJump::stringFormat(
-            "Vote cast, you can change your vote %s.\n",
-            ETJump::getPluralizedString(ETJump::VOTING_ATTEMPTS + 1 -
-                                            client->pers.votingInfo.attempts,
-                                        "time")));
+    ETJump::Print::popupR(
+        ent,
+        "Vote cast, you can change your vote %s.",
+        ETJump::getPluralizedString(ETJump::VOTING_ATTEMPTS + 1 -
+                                    client->pers.votingInfo.attempts,
+                                    "time"));
 
     return;
   }
 
   if (ent->client->sess.sessionTeam == TEAM_SPECTATOR &&
       g_spectatorVote.integer < 1) {
-    Printer::SendPopupMessage(clientNum,
-                              "You are not allowed to vote as a spectator.\n");
+    ETJump::Print::popupR(ent,
+                          "You are not allowed to vote as a spectator.");
     return;
   }
 
@@ -3022,7 +3000,7 @@ void Cmd_Vote_f(gentity_t *ent) {
     return;
   }
 
-  Printer::SendConsoleMessage(clientNum, "Vote cast.\n");
+  ETJump::Print::playerConsoleR(ent, "Vote cast.");
 
   ent->client->ps.eFlags |= EF_VOTED;
   level.voteInfo.voteCanceled = qfalse;
@@ -3668,10 +3646,7 @@ bool allowQuickFollow(gentity_t *ent, gentity_t *traceEnt) {
     return false;
   }
   if (!G_AllowFollow(ent, traceEnt)) {
-    auto clientNum = ClientNum(ent);
-    std::string specLockMsg = ETJump::stringFormat(
-        "%s is speclocked.", traceEnt->client->pers.netname);
-    Printer::SendPopupMessage(clientNum, specLockMsg);
+    Print::popupR(ent, "%s is speclocked.", traceEnt->client->pers.netname);
     return false;
   }
   if (!ent->client->pers.quickFollow) {
@@ -4397,15 +4372,14 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
   char cmd[MAX_TOKEN_CHARS] = "\0";
   gentity_t *other = nullptr;
   char *msg = nullptr;
-  auto selfNum = ClientNum(ent);
 
   if (trap_Argc() < 3) {
-    Printer::SendConsoleMessage(selfNum, "^7usage: ^3m ^7<name> <message>.\n");
+    ETJump::Print::playerConsole(ent, "usage", "<name> <message>");
     return;
   }
 
   if (ent && ent->client->sess.muted && g_mute.integer & 1) {
-    Printer::SendConsoleMessage(selfNum, "^3NOTE: ^7You are muted.\n");
+    ETJump::Print::playerConsole(ent, "NOTE", "You are muted.");
     return;
   }
 
@@ -4418,9 +4392,9 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
 
   if (!ent) {
     msg = ConcatArgs(2);
-    Printer::SendChatMessage(
-        ClientNum(other),
-        va("^7Private message from server console: ^3%s\n", msg));
+    ETJump::Print::chatR(
+        other,
+        "^7Private message from server console: ^3%s", msg);
     G_Printf("Private message to %s^7: ^3%s\n", other->client->pers.netname,
              msg);
     return;
@@ -4428,17 +4402,17 @@ void Cmd_PrivateMessage_f(gentity_t *ent) {
 
   if (!COM_BitCheck(other->client->sess.ignoreClients, ClientNum(ent))) {
     msg = ConcatArgs(2);
-    Printer::SendChatMessage(ClientNum(other),
-                             va("^7Private message from %s^7: ^3%s\n",
-                                ent->client->pers.netname, msg));
+    ETJump::Print::chatR(other,
+                         "^7Private message from %s^7: ^3%s",
+                         ent->client->pers.netname, msg);
     if (ent) {
-      Printer::SendChatMessage(selfNum, va("^7Private message to %s^7: ^3%s\n",
-                                           other->client->pers.netname, msg));
+      ETJump::Print::chatR(ent, "^7Private message to %s^7: ^3%s",
+                                           other->client->pers.netname, msg);
     }
   } else {
-    Printer::SendConsoleMessage(
-        selfNum, va("Private message to %s was ignored by the player.\n",
-                    other->client->pers.netname));
+    ETJump::Print::playerConsoleR(ent,
+                                  "Private message to %s was ignored by the player.\n",
+                                  other->client->pers.netname);
   }
 }
 
@@ -4577,7 +4551,8 @@ void Cmd_Class_f(gentity_t *ent) {
           ETJump::getPlayerClassSymbol(loadout.classId), loadout.weaponSlot);
     }
 
-    Printer::SendConsoleMessage(clientNum, usageText);
+
+    ETJump::Print::playerConsoleR(ent, usageText);
     return;
   }
 
@@ -4612,11 +4587,11 @@ void Cmd_Class_f(gentity_t *ent) {
   // display center print message
   for (auto &loadout : ETJump::availableLoadouts) {
     if (loadout.classId == classId && loadout.weaponSlot == weaponSlot) {
-      Printer::SendCenterMessage(
-          clientNum, ETJump::stringFormat("You will spawn as an %s %s",
-                                          ETJump::getPlayerTeamName(
-                                              ent->client->sess.sessionTeam),
-                                          loadout.description));
+      ETJump::Print::playerConsoleR(
+          ent, "You will spawn as an %s %s",
+          ETJump::getPlayerTeamName(
+              ent->client->sess.sessionTeam),
+          loadout.description);
       break;
     }
   }

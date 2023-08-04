@@ -33,6 +33,8 @@
 
 #include <iostream>
 
+#include "etj_print.h"
+
 const char
     *ETJump::ProgressionTrackers::ETJUMP_PROGRESSION_TRACKER_VALUE_NOT_SET =
         "-1";
@@ -145,18 +147,16 @@ void ETJump::ProgressionTrackers::useTracker(
       }
     }
 
-    auto clientNum = ClientNum(activator);
-
     if (g_debugTrackers.integer > 0) {
       for (int i = 0; i < MaxProgressionTrackers; i++) {
         if (values[i] != activator->client->sess.progression[i]) {
-          std::string trackerChangeMsg = stringFormat(
-              "^7Tracker change - "
-              "index: ^3%i "
-              "^7value: ^2%i "
-              "^7from: ^9%i^7\n",
-              i + 1, activator->client->sess.progression[i], values[i]);
-          Printer::SendPopupMessage(clientNum, trackerChangeMsg);
+          Print::popupR(activator,
+                        "^7Tracker change - "
+                        "index: ^3%i "
+                        "^7value: ^2%i "
+                        "^7from: ^9%i^7\n",
+                        i + 1, activator->client->sess.progression[i],
+                        values[i]);
         }
       }
     }

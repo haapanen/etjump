@@ -62,13 +62,13 @@ public:
   template <typename... Targs>
   static void playerConsoleR(gclient_t *client, const std::string &format,
                              const Targs &...Fargs) {
-    send(ClientNum(client), "print", format, true, Fargs...);
+    playerConsoleR(ClientNum(client), format, Fargs...);
   }
 
   template <typename... Targs>
   static void playerConsoleR(gentity_t *ent, const std::string &format,
                              const Targs &...Fargs) {
-    send(ClientNum(ent), "print", format, true, Fargs...);
+    playerConsoleR(ClientNum(ent), format, Fargs...);
   }
 
   template <typename... Targs>
@@ -99,6 +99,18 @@ public:
   }
 
   template <typename... Targs>
+  static void chatR(gclient_t *client, const std::string &format,
+                    const Targs &...Fargs) {
+    chatR(getClientNum(client), format, Fargs...);
+  }
+
+  template <typename... Targs>
+  static void chatR(gentity_t *ent, const std::string &format,
+                    const Targs &...Fargs) {
+    chatR(getClientNum(ent), format, Fargs...);
+  }
+
+  template <typename... Targs>
   static void chat(int clientNum, const std::string &context,
                    const std::string &format, const Targs &...Fargs) {
     chatR(clientNum, getContextMessage(context, format), Fargs...);
@@ -123,6 +135,18 @@ public:
   static void popupR(int clientNum, const std::string &format,
                      const Targs &...Fargs) {
     send(clientNum, "cpm", format, true, Fargs...);
+  }
+
+  template <typename... Targs>
+  static void popupR(gclient_t *client, const std::string &format,
+                     const Targs &...Fargs) {
+    popupR(getClientNum(client), format, Fargs...);
+  }
+
+  template <typename... Targs>
+  static void popupR(gentity_t *ent, const std::string &format,
+                     const Targs &...Fargs) {
+    popupR(getClientNum(ent), format, Fargs...);
   }
 
   template <typename... Targs>
@@ -177,6 +201,18 @@ public:
   static void centerR(int clientNum, const std::string &format,
                       const Targs &...Fargs) {
     send(clientNum, "cp", format, true, Fargs...);
+  }
+
+  template <typename... Targs>
+  static void centerR(gclient_t *client, const std::string &format,
+                      const Targs &...Fargs) {
+    centerR(getClientNum(client), format, Fargs...);
+  }
+
+  template <typename... Targs>
+  static void centerR(gentity_t *ent, const std::string &format,
+                      const Targs &...Fargs) {
+    centerR(getClientNum(ent), format, Fargs...);
   }
 
   template <typename... Targs>

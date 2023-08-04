@@ -5,6 +5,7 @@
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 #include "etj_map_statistics.h"
+#include "etj_print.h"
 
 #define T_FFA 0x01
 #define T_1V1 0x02
@@ -104,9 +105,9 @@ void G_voteHelp(gentity_t *ent, qboolean fShowVote) {
   auto clientNum = ClientNum(ent);
 
   if (fShowVote) {
-    Printer::SendConsoleMessage(clientNum,
-                                "\nValid ^3callvote^7 commands are:\n"
-                                "^3----------------------------\n");
+    ETJump::Print::playerConsoleR(clientNum,
+                                  "\nValid ^3callvote^7 commands are:\n"
+                                  "^3----------------------------\n");
   }
 
   for (i = 0; i < num_cmds; i++) {
@@ -124,28 +125,29 @@ void G_voteHelp(gentity_t *ent, qboolean fShowVote) {
 
   for (i = 0; i < rows; i++) {
     if (i + rows * 3 + 1 <= num_cmds) {
-      Printer::SendConsoleMessage(
+      ETJump::Print::playerConsoleR(
           clientNum, va("^5%-17s%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
                         aVoteInfo[vi[i + rows]].pszVoteName,
                         aVoteInfo[vi[i + rows * 2]].pszVoteName,
                         aVoteInfo[vi[i + rows * 3]].pszVoteName));
     } else if (i + rows * 2 + 1 <= num_cmds) {
-      Printer::SendConsoleMessage(
+      ETJump::Print::playerConsoleR(
           clientNum, va("^5%-17s%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
                         aVoteInfo[vi[i + rows]].pszVoteName,
                         aVoteInfo[vi[i + rows * 2]].pszVoteName));
     } else if (i + rows + 1 <= num_cmds) {
-      Printer::SendConsoleMessage(
+      ETJump::Print::playerConsoleR(
           clientNum, va("^5%-17s%-17s", aVoteInfo[vi[i]].pszVoteName,
                         aVoteInfo[vi[i + rows]].pszVoteName));
     } else {
-      Printer::SendConsoleMessage(clientNum,
+      ETJump::Print::playerConsoleR(
+          clientNum,
                                   va("^5%-17s", aVoteInfo[vi[i]].pszVoteName));
     }
   }
 
   if (fShowVote) {
-    Printer::SendConsoleMessage(
+    ETJump::Print::playerConsoleR(
         clientNum,
         "\n\nUsage: ^3callvote <command> <params>\n"
         "^7For current settings/help, use: ^3callvote <command> ?\n");
@@ -374,7 +376,7 @@ int G_RandomMap_v(gentity_t *ent, unsigned dwVoteIndex, char *arg, char *arg2) {
 
     std::string map;
     if (!ETJump::matchRandomMap(arg2, map)) {
-      Printer::SendConsoleMessage(ClientNum(ent), map);
+      ETJump::Print::playerConsoleR(ClientNum(ent), map);
       return G_INVALID;
     }
 
@@ -415,7 +417,7 @@ int G_Map_v(gentity_t *ent, unsigned int dwVoteIndex, char *arg, char *arg2,
 
     std::string map;
     if (!ETJump::matchMap(arg2, map, cheats)) {
-      Printer::SendConsoleMessage(clientNum, map);
+      ETJump::Print::playerConsoleR(clientNum, map);
       return G_INVALID;
     }
 

@@ -24,6 +24,7 @@
 
 #include "etj_banner_system.h"
 #include "etj_common.h"
+#include "etj_print.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 
@@ -54,19 +55,19 @@ void ETJump::BannerSystem::check(int levelTime) {
 
   switch (_options.location) {
     case Center:
-      Printer::BroadcastCenterMessage(message);
+      Print::broadcastCenterR(message);
       break;
     case Top:
-      Printer::BroadcastTopBannerMessage(message);
+      Print::broadcastBannerR(message);
       break;
     case Chat:
-      Printer::BroadcastChatMessage(message);
+      Print::broadcastChatR(message);
       break;
     case Left:
-      Printer::BroadcastLeftBannerMessage(message);
+      Print::broadcastPopupR(message);
       break;
     default:
-      Printer::BroadcastTopBannerMessage(message);
+      Print::broadcastBannerR(message);
       break;
   }
 

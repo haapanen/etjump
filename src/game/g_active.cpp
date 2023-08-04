@@ -4,6 +4,7 @@
 #include "etj_printer.h"
 #include "etj_inactivity_timer.h"
 #include "etj_numeric_utilities.h"
+#include "etj_print.h"
 #include "etj_string_utilities.h"
 
 /*
@@ -1115,14 +1116,13 @@ void ClientThink_real(gentity_t *ent) {
   // Stop lagging through triggers in timeruns
   if (client->sess.timerunActive) {
     if (client->ps.ping > 400) {
-      Printer::SendCenterMessage(ClientNum(ent), "^3WARNING: ^7Timerun "
-                                                 "stopped due to high ping!");
+      ETJump::Print::center(ent, "WARNING",
+                            "Timerun stopped due to high ping!");
       InterruptRun(ent);
       client->sess.timerunActive = qfalse;
     }
     if (client->pers.maxFPS < 25) {
-      Printer::SendCenterMessage(ClientNum(ent), "^3WARNING: ^7Timerun "
-                                                 "stopped due to low FPS!");
+      ETJump::Print::center(ent, "WARNING", "Timerun stopped due to low FPS!");
       InterruptRun(ent);
       client->sess.timerunActive = qfalse;
     }

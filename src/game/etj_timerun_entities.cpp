@@ -29,6 +29,7 @@
 
 #include "etj_container_utilities.h"
 #include "etj_local.h"
+#include "etj_print.h"
 #include "etj_printer.h"
 #include "etj_string_utilities.h"
 #include "etj_timerun_v2.h"
@@ -147,7 +148,6 @@ void TargetStartTimer::spawn(gentity_t *self) {
 }
 
 bool TargetStartTimer::canStartTimerun(gentity_t *self, gentity_t *activator,
-                                       const int *clientNum,
                                        const float *speed) {
   auto client = activator->client;
 
@@ -158,23 +158,23 @@ bool TargetStartTimer::canStartTimerun(gentity_t *self, gentity_t *activator,
   // disable some checks if we're on a debugging session
   if (!g_debugTimeruns.integer) {
     if (client->noclip || activator->flags & FL_GODMODE) {
-      Printer::SendCenterMessage(
-          *clientNum,
+      Print::centerR(
+          client,
           "^3WARNING: ^7Timerun was not started. Invalid playerstate!");
       return false;
     }
     if (*speed > self->velocityUpperLimit) {
-      Printer::SendCenterMessage(
-          *clientNum, stringFormat("^3WARNING: ^7Timerun was not started. Too "
-                                   "high starting speed (%.2f > %.2f)\n",
-                                   *speed, self->velocityUpperLimit));
+      Print::centerR(client,
+                     "^3WARNING: ^7Timerun was not started. Too "
+                     "high starting speed (%.2f > %.2f)\n",
+                     *speed, self->velocityUpperLimit);
       return false;
     }
     if (client->ps.viewangles[ROLL] != 0) {
-      Printer::SendCenterMessage(
-          *clientNum, stringFormat("^3WARNING: ^7Timerun was not started. "
-                                   "Illegal roll angles (%.2f != 0)",
-                                   client->ps.viewangles[ROLL]));
+      Print::centerR(client,
+                     "^3WARNING: ^7Timerun was not started. "
+                     "Illegal roll angles (%.2f != 0)",
+                     client->ps.viewangles[ROLL]);
       return false;
     }
   }
@@ -190,7 +190,7 @@ void TargetStartTimer::use(gentity_t *self, gentity_t *activator) {
   auto client = activator->client;
   const float speed = VectorLength(client->ps.velocity);
 
-  if (!canStartTimerun(self, activator, &clientNum, &speed)) {
+  if (!canStartTimerun(self, activator, &speed)) {
     return;
   }
 
@@ -201,17 +201,17 @@ void TargetStartTimer::use(gentity_t *self, gentity_t *activator) {
       client->sess.runSpawnflags &
       static_cast<int>(TimerunSpawnflags::ResetNoPmove)) {
     if (!client->pers.pmoveFixed) {
-      Printer::SendCenterMessage(
-          clientNum,
+      Print::centerR(
+          activator,
           "^3WARNING: ^7Timerun was not started. ^3pmove_fixed ^7is disabled!");
       return;
     }
   }
 
   if (!client->sess.timerunCheatsNotified && g_cheats.integer) {
-    Printer::SendPopupMessage(clientNum,
-                              "^3WARNING: ^7Cheats are enabled! Timerun "
-                              "records will not be saved!\n");
+    Print::popupR(activator,
+                  "^3WARNING: ^7Cheats are enabled! Timerun "
+                  "records will not be saved!\n");
     client->sess.timerunCheatsNotified = true;
   }
 

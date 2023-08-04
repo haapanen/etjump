@@ -7,6 +7,7 @@
 
 #include <algorithm>
 
+#include "etj_print.h"
 #include "g_local.h"
 #include "etj_printer.h"
 
@@ -1732,7 +1733,7 @@ void Weapon_Engineer(gentity_t *ent) {
       traceEnt->takedamage = qtrue;
       traceEnt->s.eFlags &= ~EF_SMOKING;
 
-      Printer::SendCenterMessage(clientNum, "You have repaired the MG!");
+      ETJump::Print::centerR(clientNum, "You have repaired the MG!");
       G_AddEvent(ent, EV_MG42_FIXED, 0);
     } else {
       traceEnt->health += 3;
