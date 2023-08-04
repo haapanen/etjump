@@ -60,6 +60,18 @@ public:
   }
 
   template <typename... Targs>
+  static void playerConsoleR(gclient_t *client, const std::string &format,
+                             const Targs &...Fargs) {
+    send(ClientNum(client), "print", format, true, Fargs...);
+  }
+
+  template <typename... Targs>
+  static void playerConsoleR(gentity_t *ent, const std::string &format,
+                             const Targs &...Fargs) {
+    send(ClientNum(ent), "print", format, true, Fargs...);
+  }
+
+  template <typename... Targs>
   static void playerConsole(int clientNum, const std::string &context,
                             const std::string &format, const Targs &...Fargs) {
     playerConsoleR(clientNum, getContextMessage(context, format), Fargs...);
@@ -194,7 +206,7 @@ public:
       auto message = stringFormat(formatString, Fargs...);
 
       if (clientNum.hasValue() && (clientNum.value() < CONSOLE_CLIENT_NUMBER ||
-          clientNum.value() > MAX_CLIENTS)) {
+                                   clientNum.value() > MAX_CLIENTS)) {
         logger.error("Trying to send a message to clientNum %d: %s. Ignoring "
                      "the message.",
                      clientNum.value(), message);

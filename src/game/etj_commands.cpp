@@ -26,7 +26,6 @@
 #include "etj_commands.h"
 
 #include "etj_command_parser.h"
-#include "etj_command_parser.h"
 #include "etj_local.h"
 #include "etj_save_system.h"
 #include "etj_session.h"
@@ -34,10 +33,10 @@
 #include "g_local.h"
 #include "etj_map_statistics.h"
 #include "etj_numeric_utilities.h"
+#include "etj_print.h"
 #include "etj_utilities.h"
 #include "etj_tokens.h"
 #include "etj_string_utilities.h"
-#include "etj_printer.h"
 #include "etj_timerun_v2.h"
 
 typedef std::function<bool(gentity_t *ent, Arguments argv)> Command;
@@ -94,21 +93,16 @@ auto deprecated_getCommand(const std::string &commandPrefix, int clientNum,
   auto command = ETJump::CommandParser(def, *args).parse();
 
   if (command.helpRequested) {
-    Printer::SendChatMessage(
-        clientNum,
-        ETJump::stringFormat("^3%s: ^7check console for help.", commandPrefix));
-    Printer::SendConsoleMessage(clientNum, def.help());
+    ETJump::Print::chat(clientNum, commandPrefix, "check console for help.");
+    ETJump::Print::playerConsoleR(clientNum, def.help());
     return ETJump::opt<ETJump::CommandParser::Command>();
   }
 
   if (command.errors.size() > 0) {
-    Printer::SendChatMessage(
-        clientNum,
-        ETJump::stringFormat(
-            "^3%s: ^7operation failed. Check console for more information.",
-            commandPrefix));
-
-    Printer::SendConsoleMessage(clientNum, command.getErrorMessage() + "\n");
+    ETJump::Print::chat(
+        clientNum, commandPrefix,
+        "operation failed. Check console for more information.");
+    ETJump::Print::playerConsoleR(clientNum, command.getErrorMessage());
 
     return ETJump::opt<ETJump::CommandParser::Command>();
   }
@@ -933,9 +927,7 @@ bool FindMap(gentity_t *ent, Arguments argv) {
     }
   }
 
-  buffer += "\n";
-
-  Printer::SendConsoleMessage(ClientNum(ent), buffer);
+  ETJump::Print::playerConsoleR(ent, buffer);
   return true;
 }
 
@@ -1103,7 +1095,7 @@ bool LeastPlayed(gentity_t *ent, Arguments argv) {
     ++listedMaps;
   }
 
-  Printer::SendConsoleMessage(ClientNum(ent), buffer);
+  ETJump::Print::playerConsoleR(ent, buffer);
 
   return true;
 }
@@ -1190,9 +1182,9 @@ bool ListMaps(gentity_t *ent, Arguments argv) {
   buffer += "\n";
 
   buffer += "\n^zFound ^3" + ETJump::getPluralizedString(maps.size(), "^zmap") +
-      " on the server.\n";
+      " on the server.";
 
-  Printer::SendConsoleMessage(ClientNum(ent), buffer);
+  ETJump::Print::playerConsoleR(ent, buffer);
 
   return true;
 }
@@ -1364,7 +1356,7 @@ bool MostPlayed(gentity_t *ent, Arguments argv) {
     ++listedMaps;
   }
 
-  Printer::SendConsoleMessage(ClientNum(ent), buffer);
+  ETJump::Print::playerConsoleR(ent, buffer);
 
   return true;
 }
@@ -1844,10 +1836,8 @@ bool Tokens(gentity_t *ent, Arguments argv) {
 
   if (ent) {
     if (argv->size() < 2) {
-      ChatPrintTo(ent, "^3usage: ^7check console for "
-                  "more information");
-      Printer::SendConsoleMessage(
-          ClientNum(ent),
+      ETJump::Print::chat(ent, "tokens", "check console for more information.");
+      ETJump::Print::playerConsoleR(ent, 
           "^7!tokens create <easy (e)|medium (m)|hard (h)> ^9| Creates a new "
           "token\n"
           "^7!tokens move ^9| Moves nearest token to your location\n"
@@ -1858,8 +1848,7 @@ bool Tokens(gentity_t *ent, Arguments argv) {
     }
   } else {
     if (argv->size() < 4) {
-      Printer::SendConsoleMessage(
-          ClientNum(ent),
+      ETJump::Print::playerConsoleR(ent, 
           "^3usage: \n^7!tokens <easy (e)|medium (m)|hard (h)> <difficulty> "
           "<x> <y> <z>\n"
           "!tokens <delete> <easy (e)|medium (m)|hard (h)> <1-6>\n");
@@ -1981,18 +1970,14 @@ bool NewMaps(gentity_t *ent, Arguments argv) {
     try {
       numMaps = std::stoi(argv->at(1), nullptr, 10);
     } catch (const std::invalid_argument &) {
-      Printer::SendChatMessage(
-          ClientNum(ent),
-          ETJump::stringFormat("^3newmaps: ^7%s^7 is not a number",
-                               argv->at(1)));
+      ETJump::Print::chat(ent, "newmaps", "%s^7 is not a number", argv->at(1));
       return false;
     } catch (const std::out_of_range &) {
       numMaps = 5;
     }
 
     if (numMaps <= 0) {
-      Printer::SendChatMessage(ClientNum(ent),
-                               "^3newmaps: ^7second argument must be over 0");
+      ETJump::Print::chat(ent, "newmaps", "second argument must be over 0.");
       return false;
     }
 
@@ -2019,7 +2004,7 @@ bool NewMaps(gentity_t *ent, Arguments argv) {
     lines++;
   }
 
-  Printer::SendConsoleMessage(ClientNum(ent), buffer);
+  ETJump::Print::playerConsoleR(ent, buffer);
 
   return true;
 }
@@ -2062,10 +2047,11 @@ bool TimerunAddSeason(gentity_t *ent, Arguments argv) {
 
   if (end.hasValue()) {
     if ((*end).date < start) {
-      Printer::SendChatMessage(clientNum, ETJump::stringFormat(
-                                   "^3addseason: ^7Start time `%s` is after end time `%s`",
-                                   start.toDateString(),
-                                   end.value().date.toDateString()));
+      ETJump::Print::chat(
+          clientNum, "add-season",
+          "Start time `%s` is after end time `%s`",
+          start.toDateString(),
+          end.value().date.toDateString());
       return true;
     }
   }
