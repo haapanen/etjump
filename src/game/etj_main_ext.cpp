@@ -33,6 +33,7 @@
 #include "etj_utilities.h"
 #include "etj_motd.h"
 #include "etj_map_statistics.h"
+#include "etj_print.h"
 #include "etj_tokens.h"
 #include "etj_shared.h"
 #include "etj_string_utilities.h"

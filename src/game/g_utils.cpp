@@ -1723,9 +1723,17 @@ int FindClientByName(char *name) {
   return -1;
 }
 
-int ClientNum(gentity_t *ent) { return static_cast<int>(ent - g_entities); }
+int ClientNum(gentity_t *ent) {
+  if (!ent) {
+    return -1;
+  }
+  return static_cast<int>(ent - g_entities);
+}
 
 int ClientNum(gclient_t *client) {
+  if (!client) {
+    return -1;
+  }
   return static_cast<int>(client - level.clients);
 }
 

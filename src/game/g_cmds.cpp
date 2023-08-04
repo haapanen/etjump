@@ -7,6 +7,7 @@
 #include "etj_operation_result.h"
 #include "etj_save_system.h"
 #include "etj_entity_utilities.h"
+#include "etj_print.h"
 #include "etj_string_utilities.h"
 
 void BotDebug(int clientNum);
@@ -4957,6 +4958,94 @@ void ClientCommand(int clientNum) {
   if (!Q_stricmp(cmd, "mod_information")) {
     C_ConsolePrintTo(ent,
                      va("%s %s %s", GAME_NAME, GAME_VERSION_DATED, __TIME__));
+    return;
+  }
+
+  if (!Q_stricmp(cmd, "prettiest")) {
+    for (int c = 33; c < 125; ++c) {
+      ConsolePrintTo(
+          ent, ETJump::stringFormat("^%cmessage%c: ^7here's the payload\n", (char)c, (char)c));
+    }
+    return;
+  }
+
+  if (!Q_stricmp(cmd, "test")) {
+    ETJump::Print::playerConsole(ClientNum(ent), "command",
+                                 "a message goes here %s", "parameter");
+    ETJump::Print::playerConsole(ent, "command", "a message goes here %s",
+                                 "parameter");
+    ETJump::Print::playerConsole(ent->client, "command",
+                                 "a message goes here %s", "parameter");
+    ETJump::Print::playerConsoleR(ClientNum(ent), "raw console here %s", "parameter");
+
+    ETJump::Print::chat(ClientNum(ent), "command",
+                                 "a message goes here %s", "parameter");
+    ETJump::Print::chat(ent, "command", "a message goes here %s", "parameter");
+    ETJump::Print::chat((gentity_t*)nullptr, "command", "nullptr msg %s", "parameter");
+    ETJump::Print::chat(ent->client, "command",
+                                 "a message goes here %s", "parameter");
+    ETJump::Print::chatR(ClientNum(ent), "raw chat message %s", "parameter");
+    // For popup "cpm"
+    ETJump::Print::popup(ClientNum(ent), "command",
+                         "a popup message goes here %s", "parameter");
+    ETJump::Print::popup(ent, "command", "a popup message goes here %s",
+                         "parameter");
+    ETJump::Print::popup(ent->client, "command", "a popup message goes here %s",
+                         "parameter");
+    ETJump::Print::popupR(ClientNum(ent), "raw popup message here %s",
+                          "parameter");
+
+    // For banner "bp"
+    ETJump::Print::banner(ClientNum(ent), "command",
+                          "a banner message goes here %s", "parameter");
+    ETJump::Print::banner(ent, "command", "a banner message goes here %s",
+                          "parameter");
+    ETJump::Print::banner(ent->client, "command",
+                          "a banner message goes here %s", "parameter");
+    ETJump::Print::bannerR(ClientNum(ent), "raw banner message here %s",
+                           "parameter");
+
+    // For center "cp"
+    ETJump::Print::center(ClientNum(ent), "command",
+                          "a center message goes here %s", "parameter");
+    ETJump::Print::center(ent, "command", "a center message goes here %s",
+                          "parameter");
+    ETJump::Print::center(ent->client, "command",
+                          "a center message goes here %s", "parameter");
+    ETJump::Print::centerR(ClientNum(ent), "raw center message here %s",
+                           "parameter");
+
+    // Test messages for broadcastPlayerConsole
+    ETJump::Print::broadcastPlayerConsole(
+        "command", "broadcast console message goes here %s", "parameter");
+    ETJump::Print::broadcastPlayerConsoleR(
+        "raw broadcast console message here %s", "parameter");
+
+    // Test messages for broadcastChat
+    ETJump::Print::broadcastChat(
+        "command", "broadcast chat message goes here %s", "parameter");
+    ETJump::Print::broadcastChatR("raw broadcast chat message here %s",
+                                  "parameter");
+
+    // Test messages for broadcastPopup
+    ETJump::Print::broadcastPopup(
+        "command", "broadcast popup message goes here %s", "parameter");
+    ETJump::Print::broadcastPopupR("raw broadcast popup message here %s",
+                                   "parameter");
+
+    // Test messages for broadcastBanner
+    ETJump::Print::broadcastBanner(
+        "command", "broadcast banner message goes here %s", "parameter");
+    ETJump::Print::broadcastBannerR("raw broadcast banner message here %s",
+                                    "parameter");
+
+    // Test messages for broadcastCenter
+    ETJump::Print::broadcastCenter(
+        "command", "broadcast center message goes here %s", "parameter");
+    ETJump::Print::broadcastCenterR("raw broadcast center message here %s",
+                                    "parameter");
+
+
     return;
   }
 

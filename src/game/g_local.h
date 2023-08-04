@@ -2968,5 +2968,6 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 
 const size_t BYTES_PER_PACKET = 998;
+const int CONSOLE_CLIENT_NUMBER = -1;
 
 #endif // G_LOCAL_H
