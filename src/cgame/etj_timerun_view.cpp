@@ -204,7 +204,7 @@ void ETJump::TimerunView::draw() {
       return;
     }
 
-    for (int i = startIndex; i >= 0 && i >= endIndex; i--) {
+    for (int i = startIndex; i >= 0 && i > endIndex; i--) {
       vec4_t *checkpointColor = &colorWhite;
       const int checkpointTime = run->checkpoints[i];
       // Use the previous record as checkpoint time if no new ones
