@@ -22,37 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef GAME_HPP
-#define GAME_HPP
+#include "etj_session_v2.h"
 
-#include <memory>
+void ETJump::SessionV2::initialize() { _userRepository->initialize(); }
 
-namespace ETJump {
-class SessionV2;
-class TimerunV2;
-class RockTheVote;
-} // namespace ETJump
-
-class Levels;
-class Commands;
-class CustomMapVotes;
-class Motd;
-class Timerun;
-class MapStatistics;
-class Tokens;
-
-struct Game {
-  Game() {}
-
-  std::shared_ptr<Levels> levels;
-  std::shared_ptr<Commands> commands;
-  std::shared_ptr<CustomMapVotes> customMapVotes;
-  std::shared_ptr<Motd> motd;
-  std::shared_ptr<MapStatistics> mapStatistics;
-  std::shared_ptr<Tokens> tokens;
-  std::shared_ptr<ETJump::SessionV2> sessionV2;
-  std::shared_ptr<ETJump::TimerunV2> timerunV2;
-  std::shared_ptr<ETJump::RockTheVote> rtv;
-};
-
-#endif
+void ETJump::SessionV2::shutdown() {}

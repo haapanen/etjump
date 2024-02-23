@@ -41,6 +41,20 @@ std::string hash(const std::string &input);
 std::string getBestMatch(const std::vector<std::string> &words,
                          const std::string &current);
 std::string sanitize(const std::string &text, bool toLower = false);
+
+/**
+ * A string wrapper that provides both the original string and the
+ * sanitized (no color codes) text
+ */
+struct ColoredText {
+  explicit ColoredText(const std::string &text)
+      : text(text), cleanText(sanitize(text)) {}
+  ColoredText(std::string text, std::string cleanText)
+      : text(std::move(text)), cleanText(std::move(cleanText)) {}
+  std::string text;
+  std::string cleanText;
+};
+
 // returns the value if it's specified, else the default value
 std::string getValue(const char *value, const std::string &defaultValue = "");
 std::string getValue(const std::string &value,

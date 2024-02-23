@@ -39,6 +39,7 @@
 #include "etj_timerun_repository.h"
 #include "etj_timerun_v2.h"
 #include "etj_rtv.h"
+#include "etj_session_v2.h"
 
 Game game;
 
@@ -179,6 +180,14 @@ void OnGameInit() {
     }
   }
 
+  game.sessionV2 = std::make_shared<ETJump::SessionV2>(
+      std::make_unique<ETJump::UserRepository>(
+          std::make_unique<ETJump::DatabaseV2>(
+              "usersv2", GetPath(std::string(g_userConfig.string)) + ".v2"),
+          std::make_unique<ETJump::DatabaseV2>(
+              "usersv1", GetPath(std::string(g_userConfig.string)))));
+  game.sessionV2->initialize();
+
   game.timerunV2 = std::make_shared<ETJump::TimerunV2>(
       level.rawmapname,
       std::make_unique<ETJump::TimerunRepository>(
@@ -225,6 +234,9 @@ void OnGameShutdown() {
   if (game.timerunV2) {
     game.timerunV2->shutdown();
   }
+  if (game.sessionV2) {
+    game.sessionV2->shutdown();
+  }
 
   game.levels = nullptr;
   game.commands = nullptr;
@@ -233,6 +245,7 @@ void OnGameShutdown() {
   game.mapStatistics = nullptr;
   game.tokens = nullptr;
   game.timerunV2 = nullptr;
+  game.sessionV2 = nullptr;
   game.rtv = nullptr;
   ETJump::Log::processMessages();
 }

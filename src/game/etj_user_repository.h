@@ -22,37 +22,36 @@
  * SOFTWARE.
  */
 
-#ifndef GAME_HPP
-#define GAME_HPP
-
+#pragma once
 #include <memory>
 
+#include "etj_database_v2.h"
+#include "etj_user_models.h"
+
 namespace ETJump {
-class SessionV2;
-class TimerunV2;
-class RockTheVote;
-} // namespace ETJump
+class UserRepository {
+public:
+  explicit UserRepository(std::unique_ptr<ETJump::DatabaseV2> database,
+                          std::unique_ptr<ETJump::DatabaseV2> oldDatabase)
+    : _database(std::move(database)), _oldDatabase(std::move(oldDatabase)) {
+  }
 
-class Levels;
-class Commands;
-class CustomMapVotes;
-class Motd;
-class Timerun;
-class MapStatistics;
-class Tokens;
+  void initialize();
+  void migrate();
+  void shutdown();
 
-struct Game {
-  Game() {}
+  enum class ChangedField : int {
+    Name = 1,
+  };
 
-  std::shared_ptr<Levels> levels;
-  std::shared_ptr<Commands> commands;
-  std::shared_ptr<CustomMapVotes> customMapVotes;
-  std::shared_ptr<Motd> motd;
-  std::shared_ptr<MapStatistics> mapStatistics;
-  std::shared_ptr<Tokens> tokens;
-  std::shared_ptr<ETJump::SessionV2> sessionV2;
-  std::shared_ptr<ETJump::TimerunV2> timerunV2;
-  std::shared_ptr<ETJump::RockTheVote> rtv;
+  void insertUser(const ETJump::User &user);
+  void updateUser(const ETJump::User &user, int changedFields);
+  void deleteUser(int userId);
+
+private:
+  void tryToMigrateRecords();
+
+  std::unique_ptr<ETJump::DatabaseV2> _database;
+  std::unique_ptr<ETJump::DatabaseV2> _oldDatabase;
 };
-
-#endif
+}

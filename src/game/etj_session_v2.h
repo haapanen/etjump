@@ -22,37 +22,22 @@
  * SOFTWARE.
  */
 
-#ifndef GAME_HPP
-#define GAME_HPP
+#pragma once
 
 #include <memory>
 
+#include "etj_user_repository.h"
+
 namespace ETJump {
-class SessionV2;
-class TimerunV2;
-class RockTheVote;
-} // namespace ETJump
+class SessionV2 {
+public:
+  SessionV2(std::unique_ptr<UserRepository> userRepository)
+      : _userRepository(std::move(userRepository)) {}
 
-class Levels;
-class Commands;
-class CustomMapVotes;
-class Motd;
-class Timerun;
-class MapStatistics;
-class Tokens;
+  void initialize();
+  void shutdown();
 
-struct Game {
-  Game() {}
-
-  std::shared_ptr<Levels> levels;
-  std::shared_ptr<Commands> commands;
-  std::shared_ptr<CustomMapVotes> customMapVotes;
-  std::shared_ptr<Motd> motd;
-  std::shared_ptr<MapStatistics> mapStatistics;
-  std::shared_ptr<Tokens> tokens;
-  std::shared_ptr<ETJump::SessionV2> sessionV2;
-  std::shared_ptr<ETJump::TimerunV2> timerunV2;
-  std::shared_ptr<ETJump::RockTheVote> rtv;
+private:
+  std::unique_ptr<UserRepository> _userRepository;
 };
-
-#endif
+} // namespace ETJump

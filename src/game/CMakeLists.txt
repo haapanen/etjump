@@ -78,6 +78,7 @@ add_library(qagame MODULE
 	"etj_rtv.cpp"
 	"etj_save_system.cpp"
 	"etj_session.cpp"
+	"etj_session_v2.cpp"
 	"etj_synchronization_context.cpp"
 	"etj_string_utilities.cpp"
 	"etj_target_init.cpp"
@@ -88,6 +89,7 @@ add_library(qagame MODULE
 	"etj_timerun_shared.cpp"
 	"etj_tokens.cpp"
 	"etj_user.cpp"
+	"etj_user_repository.cpp"
 	"etj_utilities.cpp"
 	${GAME_HEADERS}
 )
